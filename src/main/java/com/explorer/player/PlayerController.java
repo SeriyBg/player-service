@@ -3,7 +3,6 @@ package com.explorer.player;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import com.github.javafaker.Faker;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 @SuppressWarnings("ConstantConditions")
@@ -32,9 +32,9 @@ public class PlayerController {
         return uniqueName;
     }
 
-    @PostMapping("/name/{name}/{score}")
-    public void updateScore(@PathVariable String name, @PathVariable Long score) {
-        userBoard.opsForValue().set(name, score, 5, TimeUnit.SECONDS);
+    @PostMapping("/score/{score}")
+    public void updateScore(@PathVariable Long score, @RequestHeader("user") String user) {
+        userBoard.opsForValue().set(user, score);
     }
 
     @GetMapping("/leaderboard")
