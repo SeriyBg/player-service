@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @SuppressWarnings("ConstantConditions")
@@ -38,14 +39,14 @@ public class PlayerController {
     }
 
     @GetMapping("/leaderboard")
-    public Map<String, Long> getLeaderBoard() {
+    public Map<String, Long> getLeaderBoard(@RequestParam(defaultValue = "3") Integer top) {
         Map<String, Long> collect = Objects.requireNonNull(userBoard.keys("*"))
                 .stream()
                 .collect(Collectors.toMap(Function.identity(), key -> userBoard.opsForValue().get(key)));
         return collect.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .limit(3)
+                .limit(top)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
     }
 

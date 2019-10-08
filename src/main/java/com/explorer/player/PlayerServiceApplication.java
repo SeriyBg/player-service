@@ -2,9 +2,12 @@ package com.explorer.player;
 
 import java.nio.ByteBuffer;
 import com.github.javafaker.Faker;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.connection.RedisConfiguration;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
@@ -16,14 +19,24 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @EnableRedisRepositories
 public class PlayerServiceApplication {
 
+    @Value("${spring.redis.host}")
+    private String redisHost;
+    @Value("${spring.redis.port}")
+    private int redisPort;
+
     @Bean
     public Faker faker() {
         return new Faker();
     }
 
     @Bean
+    public RedisConfiguration redisConfiguration() {
+        return new RedisStandaloneConfiguration(redisHost, redisPort);
+    }
+
+    @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory();
+        return new LettuceConnectionFactory(redisConfiguration());
     }
 
     @Bean
