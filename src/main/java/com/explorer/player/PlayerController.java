@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,17 +21,30 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RestController
 @CrossOrigin
+@RequestMapping("/player")
 public class PlayerController {
 
     private final Faker faker;
     private RedisTemplate<String, Long> userBoard;
-    private static String some = null;
+
+    @GetMapping("")
+    public String health() {
+        return "Ok";
+    }
 
     @GetMapping("/name")
     public String name() {
         String uniqueName = generateUniqueName();
         userBoard.opsForValue().set(uniqueName, 0L);
         return uniqueName;
+    }
+
+    @GetMapping("/score")
+    public Long playerScore(@RequestHeader("user") String user) {
+        if (user == null || user.isBlank()) {
+            return 0L;
+        }
+        return userBoard.opsForValue().get(user);
     }
 
     @PostMapping("/score/{score}")
