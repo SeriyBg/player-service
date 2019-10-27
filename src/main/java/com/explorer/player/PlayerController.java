@@ -67,7 +67,10 @@ public class PlayerController {
     private String generateUniqueName() {
         var name = faker.ancient().god() + " " + faker.space().company();
         if(userBoard.hasKey(name)) {
-            name = generateUniqueName();
+            name = faker.ancient().hero() + " " + faker.space().company();
+            if(userBoard.hasKey(name)) {
+                name = generateUniqueName();
+            }
         }
         return name;
     }
