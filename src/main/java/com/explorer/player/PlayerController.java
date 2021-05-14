@@ -1,13 +1,8 @@
 package com.explorer.player;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import com.github.javafaker.Faker;
+import com.hazelcast.map.IMap;
 import lombok.AllArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@SuppressWarnings("ConstantConditions")
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @AllArgsConstructor
 @RestController
 @CrossOrigin
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PlayerController {
 
     private final Faker faker;
-    private RedisTemplate<String, Long> userBoard;
+    private final IMap<String, Long> leaderboard;
 
     @GetMapping("")
     public String health() {
@@ -35,7 +35,7 @@ public class PlayerController {
     @GetMapping("/name")
     public String name() {
         String uniqueName = generateUniqueName();
-        userBoard.opsForValue().set(uniqueName, 0L);
+        leaderboard.put(uniqueName, 0L);
         return uniqueName;
     }
 
@@ -44,20 +44,17 @@ public class PlayerController {
         if (user == null || user.isBlank()) {
             return 0L;
         }
-        return userBoard.opsForValue().get(user);
+        return leaderboard.get(user);
     }
 
     @PostMapping("/score/{score}")
     public void updateScore(@PathVariable Long score, @RequestHeader("user") String user) {
-        userBoard.opsForValue().set(user, score);
+        leaderboard.put(user, score);
     }
 
     @GetMapping("/leaderboard")
     public Map<String, Long> getLeaderBoard(@RequestParam(defaultValue = "3") Integer top) {
-        Map<String, Long> collect = Objects.requireNonNull(userBoard.keys("*"))
-                .stream()
-                .collect(Collectors.toMap(Function.identity(), key -> userBoard.opsForValue().get(key)));
-        return collect.entrySet()
+        return leaderboard.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
                 .limit(top)
@@ -66,9 +63,9 @@ public class PlayerController {
 
     private String generateUniqueName() {
         var name = faker.ancient().god() + " " + faker.space().company();
-        if(userBoard.hasKey(name)) {
+        if(leaderboard.containsKey(name)) {
             name = faker.ancient().hero() + " " + faker.space().company();
-            if(userBoard.hasKey(name)) {
+            if(leaderboard.containsKey(name)) {
                 name = generateUniqueName();
             }
         }
