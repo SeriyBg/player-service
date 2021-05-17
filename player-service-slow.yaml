@@ -23,8 +23,8 @@ spec:
           ports:
             - containerPort: 8081
           env:
-            - name: REDIS_HOST
-              value: redis-service
+            - name: HZCLIENT_NETWORK_CLUSTERMEMBERS_ADDRESS
+              value: hz-hazelcast
   selector:
     matchLabels:
       app: player-service
