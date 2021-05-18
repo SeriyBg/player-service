@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -52,6 +53,9 @@ public class PlayerController {
 
     @GetMapping("/leaderboard")
     public Map<String, Long> getLeaderBoard(@RequestParam(defaultValue = "3") Integer top) {
+        if (new Random().nextBoolean()) {
+            throw new RuntimeException("Something gone wrong. Leaderboard is not available!");
+        }
         return leaderboard.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
