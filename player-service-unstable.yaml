@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: player-service
-          image: sbishyr/player-service:1.0-unstable
+          image: sbishyr/player-service:2.0-unstable
           imagePullPolicy: Always
           ports:
             - containerPort: 8081
